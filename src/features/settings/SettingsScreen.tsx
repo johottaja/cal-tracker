@@ -1,27 +1,56 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppButton, Card, Heading, NumericField, Screen, Section } from '@/components/ui';
+import {
+  AppButton,
+  Card,
+  Heading,
+  NumericField,
+  Screen,
+  Section,
+  SegmentedControl,
+} from '@/components/ui';
 import { spacing, useAppTheme } from '@/constants/theme';
 import type { MacroValues } from '@/domain/models';
 import { InlineNotice, StatusPill } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
+import {
+  useThemePreference,
+  type ThemePreference,
+} from '@/providers/ThemePreferenceProvider';
+import { getUsdToEurRate, usdMicrosToEur } from '@/services/cost/usdToEur';
 
 type GoalForm = Record<keyof MacroValues, string>;
 
-function formatUsd(micros: number): string {
+const APPEARANCE_OPTIONS = ['System', 'Light', 'Dark'] as const;
+type AppearanceLabel = (typeof APPEARANCE_OPTIONS)[number];
+
+const preferenceFromLabel: Record<AppearanceLabel, ThemePreference> = {
+  System: 'system',
+  Light: 'light',
+  Dark: 'dark',
+};
+
+const labelFromPreference: Record<ThemePreference, AppearanceLabel> = {
+  system: 'System',
+  light: 'Light',
+  dark: 'Dark',
+};
+
+function formatEur(amount: number): string {
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 4,
-  }).format(micros / 1_000_000);
+  }).format(amount);
 }
 
 export function SettingsScreen() {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
+  const { preference, setPreference } = useThemePreference();
   const {
     user,
     goals,
@@ -41,6 +70,22 @@ export function SettingsScreen() {
   }));
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [usdToEur, setUsdToEur] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const rate = await getUsdToEurRate();
+        if (!cancelled) setUsdToEur(rate);
+      } catch {
+        if (!cancelled) setUsdToEur(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [costSummary?.refreshedAt]);
 
   const updateGoal = (key: keyof GoalForm) => (value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
@@ -111,6 +156,19 @@ export function SettingsScreen() {
         timeStyle: 'short',
       }).format(new Date(syncStatus.lastSuccessfulSyncAt))
     : 'Not yet synced';
+
+  const monthCost =
+    costSummary && usdToEur !== null
+      ? formatEur(usdMicrosToEur(costSummary.monthCostMicrosUsd, usdToEur))
+      : costSummary
+        ? '…'
+        : 'Unavailable';
+  const yearCost =
+    costSummary && usdToEur !== null
+      ? formatEur(usdMicrosToEur(costSummary.yearCostMicrosUsd, usdToEur))
+      : costSummary
+        ? '…'
+        : 'Unavailable';
 
   return (
     <Screen style={{ paddingTop: insets.top + spacing.sm }}>
@@ -219,16 +277,12 @@ export function SettingsScreen() {
         <Card style={styles.costCard}>
           <View style={styles.costItem}>
             <Text style={[styles.costLabel, { color: theme.muted }]}>This month</Text>
-            <Text style={[styles.costValue, { color: theme.text }]}>
-              {costSummary ? formatUsd(costSummary.monthCostMicrosUsd) : 'Unavailable'}
-            </Text>
+            <Text style={[styles.costValue, { color: theme.text }]}>{monthCost}</Text>
           </View>
           <View style={[styles.divider, { backgroundColor: theme.border }]} />
           <View style={styles.costItem}>
             <Text style={[styles.costLabel, { color: theme.muted }]}>This year</Text>
-            <Text style={[styles.costValue, { color: theme.text }]}>
-              {costSummary ? formatUsd(costSummary.yearCostMicrosUsd) : 'Unavailable'}
-            </Text>
+            <Text style={[styles.costValue, { color: theme.text }]}>{yearCost}</Text>
           </View>
           <Text style={[styles.note, { color: theme.muted }]}>
             {costSummary
@@ -237,6 +291,9 @@ export function SettingsScreen() {
                   timeStyle: 'short',
                 }).format(new Date(costSummary.refreshedAt))}. `
               : ''}
+            {usdToEur !== null
+              ? `Shown in euros using the ECB USD→EUR rate (${usdToEur.toFixed(4)}). `
+              : 'Euro conversion needs a network connection. '}
             This attributable estimate is not a billing invoice and excludes taxes and account
             adjustments.
           </Text>
@@ -244,11 +301,18 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Appearance">
-        <Card>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Follows iPhone settings</Text>
+        <Card style={styles.card}>
+          <Text style={[styles.cardTitle, { color: theme.text }]}>Color mode</Text>
           <Text style={[styles.body, { color: theme.muted }]}>
-            Cal Tracker automatically uses your system light or dark appearance.
+            Choose light, dark, or match your iPhone settings.
           </Text>
+          <SegmentedControl
+            values={APPEARANCE_OPTIONS}
+            value={labelFromPreference[preference]}
+            onChange={(label) => {
+              void setPreference(preferenceFromLabel[label]);
+            }}
+          />
         </Card>
       </Section>
 

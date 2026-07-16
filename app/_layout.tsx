@@ -1,16 +1,18 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppButton, LoadingView } from '@/components/ui';
 import { useAppTheme } from '@/constants/theme';
 import { OnboardingScreen } from '@/features/auth/OnboardingScreen';
 import { AppProvider, useApp } from '@/providers/AppProvider';
+import { ThemePreferenceProvider } from '@/providers/ThemePreferenceProvider';
 
 function RootNavigator() {
   const theme = useAppTheme();
+  const colorScheme = useColorScheme();
   const {
     ready,
     error,
@@ -79,7 +81,7 @@ function RootNavigator() {
 
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerBackTitle: 'Back',
@@ -106,9 +108,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AppProvider>
-        <RootNavigator />
-      </AppProvider>
+      <ThemePreferenceProvider>
+        <AppProvider>
+          <RootNavigator />
+        </AppProvider>
+      </ThemePreferenceProvider>
     </SafeAreaProvider>
   );
 }

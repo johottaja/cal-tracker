@@ -50,7 +50,9 @@ export function ActionCard({
         pressed && styles.pressed,
       ]}>
       <View style={[styles.icon, { backgroundColor: theme.primarySoft }]}>
-        <Text style={styles.iconText} importantForAccessibility="no">
+        <Text
+          style={[styles.iconText, { color: theme.onPrimarySoft }]}
+          importantForAccessibility="no">
           {icon}
         </Text>
       </View>

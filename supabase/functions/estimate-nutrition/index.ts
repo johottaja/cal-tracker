@@ -536,7 +536,7 @@ async function callOpenAI(
             schema: ESTIMATE_SCHEMA,
           },
         },
-        max_output_tokens: 500,
+        max_output_tokens: 2_000,
         store: false,
       }),
       signal: controller.signal,
