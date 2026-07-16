@@ -5,10 +5,13 @@
   "private": true,
   "scripts": {
     "start": "expo start --go",
+    "web": "expo start --web",
     "ios": "expo run:ios",
+    "export:web": "expo export --platform web",
     "prebuild": "expo prebuild",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "android": "expo run:android"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -19,6 +22,7 @@
     "expo-font": "~14.0.12",
     "expo-image-manipulator": "~14.0.8",
     "expo-image-picker": "~17.0.11",
+    "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.12",
     "expo-router": "~6.0.24",
     "expo-secure-store": "~15.0.8",
@@ -32,6 +36,7 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-url-polyfill": "^4.0.0",
+    "react-native-web": "^0.21.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {

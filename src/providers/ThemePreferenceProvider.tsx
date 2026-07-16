@@ -8,7 +8,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 import { Appearance } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '@/platform/secureStore';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 

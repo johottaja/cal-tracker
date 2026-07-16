@@ -1,4 +1,6 @@
-import { useColorScheme } from 'react-native';
+import { useColorScheme, type ColorValue } from 'react-native';
+
+type GradientStops = readonly [ColorValue, ColorValue, ...ColorValue[]];
 
 const palette = {
   ink: '#182022',
@@ -15,6 +17,20 @@ const palette = {
   black: '#0E1213',
 };
 
+export const macroColors = {
+  calories: palette.apricot,
+  proteinG: palette.sky,
+  carbsG: palette.gold,
+  fatG: palette.plum,
+} as const;
+
+export const macroGradients = {
+  calories: ['#F5A87A', '#E98A59'] as GradientStops,
+  proteinG: ['#6BA0C8', '#4D83A6'] as GradientStops,
+  carbsG: ['#D9B04A', '#C49A32'] as GradientStops,
+  fatG: ['#A88AA4', '#8A5E86'] as GradientStops,
+} as const;
+
 export const lightTheme = {
   background: palette.cream,
   surface: palette.paper,
@@ -30,6 +46,15 @@ export const lightTheme = {
   error: palette.red,
   tabBar: '#FFFCF5',
   shadow: '#17201D',
+  gradients: {
+    screen: ['#F7F3EA', '#FFF5E8', '#F0E8D8'] as GradientStops,
+    primary: ['#3D7A5E', '#2F6B4F'] as GradientStops,
+    icon: ['#E4F0E8', '#DDEBE2'] as GradientStops,
+    card: ['#FFFDF8', '#FFF8EE'] as GradientStops,
+    hero: ['#3D7A5E', '#2F6B4F', '#285943'] as GradientStops,
+    tabBar: ['#FFFCF5', '#F3EDE2'] as GradientStops,
+    segment: ['#FFFFFF', '#F7F1E6'] as GradientStops,
+  },
 };
 
 export const darkTheme = {
@@ -47,14 +72,16 @@ export const darkTheme = {
   error: '#EF8B86',
   tabBar: '#141B19',
   shadow: '#000000',
+  gradients: {
+    screen: ['#101514', '#16201C', '#0C100F'] as GradientStops,
+    primary: ['#8FCEAB', '#4F8F6E'] as GradientStops,
+    icon: ['#2E4A3C', '#233B30'] as GradientStops,
+    card: ['#1C2623', '#151D1B'] as GradientStops,
+    hero: ['#3A6B55', '#254636', '#1A3228'] as GradientStops,
+    tabBar: ['#18201E', '#121917'] as GradientStops,
+    segment: ['#2A3833', '#1F2B27'] as GradientStops,
+  },
 };
-
-export const macroColors = {
-  calories: palette.apricot,
-  proteinG: palette.sky,
-  carbsG: palette.gold,
-  fatG: palette.plum,
-} as const;
 
 export const spacing = {
   xs: 4,

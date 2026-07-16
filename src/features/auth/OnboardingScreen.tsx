@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -92,9 +93,13 @@ export function OnboardingScreen({
   return (
     <Screen style={styles.screen}>
       <View style={styles.brand}>
-        <View style={[styles.mark, { backgroundColor: theme.primary }]}>
+        <LinearGradient
+          colors={theme.gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.mark}>
           <Text style={styles.markText}>C</Text>
-        </View>
+        </LinearGradient>
         <Heading
           title={signedIn ? 'Set your daily goals' : 'Eat with clarity'}
           subtitle={

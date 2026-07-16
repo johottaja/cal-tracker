@@ -1,13 +1,30 @@
 import type { ExpoConfig } from 'expo/config';
 
+const splashBackgroundColor = '#1B4332';
+
 const config: ExpoConfig = {
   name: 'Cal Tracker',
   slug: 'cal-tracker',
   version: '1.0.0',
-  platforms: ['ios'],
+  platforms: ['ios', 'web'],
   orientation: 'portrait',
   scheme: 'caltracker',
   userInterfaceStyle: 'automatic',
+  icon: './assets/icon.png',
+  splash: {
+    image: './assets/splash-screen.png',
+    resizeMode: 'contain',
+    backgroundColor: splashBackgroundColor,
+  },
+  web: {
+    bundler: 'metro',
+    output: 'static',
+    favicon: './assets/icon.png',
+    name: 'Cal Tracker',
+    shortName: 'Cal Tracker',
+    themeColor: splashBackgroundColor,
+    backgroundColor: splashBackgroundColor,
+  },
   ios: {
     supportsTablet: false,
     bundleIdentifier:
@@ -20,7 +37,15 @@ const config: ExpoConfig = {
     },
   },
   plugins: [
-    'expo-router',
+    [
+      'expo-router',
+      {
+        headers: {
+          'Cross-Origin-Embedder-Policy': 'credentialless',
+          'Cross-Origin-Opener-Policy': 'same-origin',
+        },
+      },
+    ],
     'expo-sqlite',
     'expo-font',
     [
@@ -41,7 +66,15 @@ const config: ExpoConfig = {
         microphonePermission: false,
       },
     ],
-    'expo-splash-screen',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/splash-screen.png',
+        imageWidth: 240,
+        resizeMode: 'contain',
+        backgroundColor: splashBackgroundColor,
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

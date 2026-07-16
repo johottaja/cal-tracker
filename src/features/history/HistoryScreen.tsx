@@ -8,10 +8,10 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient as SvgLinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 
 import { Card, EmptyState, Heading, Screen, Section, SegmentedControl } from '@/components/ui';
-import { macroColors, radii, spacing, useAppTheme } from '@/constants/theme';
+import { macroColors, macroGradients, radii, spacing, useAppTheme } from '@/constants/theme';
 import {
   addLocalDays,
   asLocalDate,
@@ -117,6 +117,10 @@ function TrendChart({
   const path = points
     .map((point, index) => `${index ? 'L' : 'M'} ${x(index)} ${y(point.value)}`)
     .join(' ');
+  const areaPath =
+    points.length > 1
+      ? `${path} L ${x(points.length - 1)} ${height - bottom} L ${x(0)} ${height - bottom} Z`
+      : '';
   const labelEvery = points.length > 12 ? Math.ceil(points.length / 8) : 1;
   const description = `${macroMeta[macro].label} trend. Goal ${goal} ${macroMeta[macro].unit}. ${points
     .map((point) => `${point.label} ${Math.round(point.value)}`)
@@ -125,6 +129,13 @@ function TrendChart({
   return (
     <View accessibilityRole="image" accessibilityLabel={description} style={styles.chartWrap}>
       <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+        <Defs>
+          <SvgLinearGradient id={`trend-${macro}`} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={macroGradients[macro][0]} stopOpacity="0.35" />
+            <Stop offset="1" stopColor={macroGradients[macro][1]} stopOpacity="0.02" />
+          </SvgLinearGradient>
+        </Defs>
+        {areaPath ? <Path d={areaPath} fill={`url(#trend-${macro})`} /> : null}
         <Line
           x1={left}
           x2={width - right}
@@ -145,7 +156,7 @@ function TrendChart({
           stroke={theme.border}
           strokeWidth={1}
         />
-        <Path d={path} fill="none" stroke={macroColors[macro]} strokeWidth={3} />
+        <Path d={path} fill="none" stroke={macroGradients[macro][1]} strokeWidth={3} />
         {points.map((point, index) =>
           point.date ? (
             <Circle

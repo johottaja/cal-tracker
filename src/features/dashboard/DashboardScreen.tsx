@@ -1,10 +1,11 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppButton, EmptyState, Heading, MacroProgress, Screen, Section } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
+import { AppButton, EmptyState, Heading, HeroCard, MacroProgress, Screen, Section } from '@/components/ui';
+import { macroGradients, spacing, useAppTheme } from '@/constants/theme';
 import { todayLocalDate } from '@/domain/dates';
 import { addMacros, zeroMacros } from '@/domain/macros';
 import type { FoodEntry } from '@/domain/models';
@@ -61,12 +62,34 @@ export function DashboardScreen() {
     month: 'long',
     day: 'numeric',
   }).format(new Date());
+  const calorieProgress = goals && goals.calories > 0 ? Math.min(totals.calories / goals.calories, 1) : 0;
 
   return (
     <Screen style={{ paddingTop: insets.top + spacing.sm }}>
+      {goals ? (
+        <HeroCard>
+          <Text style={styles.heroEyebrow}>{dateLabel}</Text>
+          <Text style={styles.heroValue}>{Math.round(totals.calories)}</Text>
+          <Text style={styles.heroUnit}>kcal logged today</Text>
+          <View style={styles.heroTrack}>
+            <LinearGradient
+              colors={macroGradients.calories}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.heroFill, { width: `${calorieProgress * 100}%` }]}
+            />
+          </View>
+          <Text style={styles.heroMeta}>
+            {Math.round(goals.calories - totals.calories) >= 0
+              ? `${Math.round(goals.calories - totals.calories)} kcal remaining`
+              : `${Math.abs(Math.round(totals.calories - goals.calories))} kcal over goal`}
+          </Text>
+        </HeroCard>
+      ) : null}
+
       <Heading
         title="Today"
-        subtitle={`${dateLabel} · ${Math.round(totals.calories)} kcal logged`}
+        subtitle={`${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} logged`}
       />
       {!online ? (
         <InlineNotice kind="offline">
@@ -165,6 +188,18 @@ export function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
+  heroEyebrow: { color: 'rgba(255,255,255,0.82)', fontSize: 14, fontWeight: '700' },
+  heroValue: { color: '#FFFFFF', fontSize: 48, lineHeight: 52, fontWeight: '900', letterSpacing: -1.5 },
+  heroUnit: { color: 'rgba(255,255,255,0.9)', fontSize: 16, fontWeight: '600' },
+  heroTrack: {
+    height: 8,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    marginTop: spacing.sm,
+  },
+  heroFill: { height: '100%', borderRadius: 999 },
+  heroMeta: { color: 'rgba(255,255,255,0.78)', fontSize: 13, fontWeight: '600' },
   macroGrid: { gap: spacing.md },
   actions: { gap: spacing.sm },
   entryList: { gap: spacing.sm },

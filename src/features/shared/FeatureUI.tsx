@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import type { PropsWithChildren, ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 
@@ -44,18 +45,24 @@ export function ActionCard({
       accessibilityLabel={title}
       accessibilityHint={accessibilityHint ?? body}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.action,
-        { backgroundColor: theme.surface, borderColor: theme.border },
-        pressed && styles.pressed,
-      ]}>
-      <View style={[styles.icon, { backgroundColor: theme.primarySoft }]}>
+      style={({ pressed }) => [styles.action, { borderColor: theme.border }, pressed && styles.pressed]}>
+      <LinearGradient
+        colors={theme.gradients.card}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.actionGradient}
+      />
+      <LinearGradient
+        colors={theme.gradients.icon}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.icon}>
         <Text
           style={[styles.iconText, { color: theme.onPrimarySoft }]}
           importantForAccessibility="no">
           {icon}
         </Text>
-      </View>
+      </LinearGradient>
       <View style={styles.actionCopy}>
         <Text style={[styles.actionTitle, { color: theme.text }]}>{title}</Text>
         <Text style={[styles.body, { color: theme.muted }]}>{body}</Text>
@@ -152,6 +159,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    overflow: 'hidden',
+  },
+  actionGradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radii.md,
   },
   pressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
   icon: {

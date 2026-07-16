@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import type { PropsWithChildren, ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -14,7 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { macroColors, radii, spacing, useAppTheme } from '@/constants/theme';
+import { macroColors, macroGradients, radii, spacing, useAppTheme } from '@/constants/theme';
 
 export function Screen({
   children,
@@ -34,13 +35,19 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {content}
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+    <LinearGradient
+      colors={theme.gradients.screen}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.4, y: 1 }}
+      style={styles.flex}>
+      <SafeAreaView style={styles.flex} edges={['bottom']}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          {content}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
@@ -70,13 +77,36 @@ export function Card({
       style={[
         styles.card,
         {
-          backgroundColor: theme.surface,
           borderColor: theme.border,
           shadowColor: theme.shadow,
         },
         style,
       ]}>
+      <LinearGradient
+        colors={theme.gradients.card}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.cardGradient}
+      />
       {children}
+    </View>
+  );
+}
+
+export function HeroCard({
+  children,
+  style,
+}: PropsWithChildren<{ style?: ViewStyle }>) {
+  const theme = useAppTheme();
+  return (
+    <View style={[styles.heroWrap, { shadowColor: theme.shadow }, style]}>
+      <LinearGradient
+        colors={theme.gradients.hero}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.hero}>
+        {children}
+      </LinearGradient>
     </View>
   );
 }
@@ -98,19 +128,50 @@ export function AppButton({
 }) {
   const theme = useAppTheme();
   const background =
-    variant === 'primary'
-      ? theme.primary
-      : variant === 'danger'
-        ? theme.error
-        : variant === 'secondary'
-          ? theme.primarySoft
-          : 'transparent';
+    variant === 'danger'
+      ? theme.error
+      : variant === 'secondary'
+        ? theme.primarySoft
+        : variant === 'ghost'
+          ? 'transparent'
+          : undefined;
   const color =
     variant === 'primary' || variant === 'danger'
       ? '#FFFFFF'
       : variant === 'secondary'
         ? theme.primary
         : theme.text;
+  const borderColor =
+    variant === 'ghost' ? theme.border : variant === 'primary' ? 'transparent' : background;
+
+  const content = loading ? (
+    <ActivityIndicator color={color} />
+  ) : (
+    <Text style={[styles.buttonText, { color }]}>{label}</Text>
+  );
+
+  if (variant === 'primary') {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityHint={accessibilityHint}
+        disabled={disabled || loading}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.buttonWrap,
+          (disabled || loading) && styles.disabled,
+          pressed && styles.pressed,
+        ]}>
+        <LinearGradient
+          colors={theme.gradients.primary}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.button}>
+          {content}
+        </LinearGradient>
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
@@ -120,15 +181,11 @@ export function AppButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: background, borderColor: variant === 'ghost' ? theme.border : background },
+        { backgroundColor: background, borderColor },
         (disabled || loading) && styles.disabled,
         pressed && styles.pressed,
       ]}>
-      {loading ? (
-        <ActivityIndicator color={color} />
-      ) : (
-        <Text style={[styles.buttonText, { color }]}>{label}</Text>
-      )}
+      {content}
     </Pressable>
   );
 }
@@ -219,10 +276,18 @@ export function SegmentedControl<T extends string>({
             accessibilityRole="button"
             accessibilityState={{ selected }}
             onPress={() => onChange(item)}
-            style={[styles.segment, selected && { backgroundColor: theme.elevated }]}>
-            <Text style={[styles.segmentText, { color: selected ? theme.text : theme.muted }]}>
-              {item}
-            </Text>
+            style={[styles.segment, selected && styles.segmentSelected]}>
+            {selected ? (
+              <LinearGradient
+                colors={theme.gradients.segment}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.segmentGradient}>
+                <Text style={[styles.segmentText, { color: theme.text }]}>{item}</Text>
+              </LinearGradient>
+            ) : (
+              <Text style={[styles.segmentText, { color: theme.muted }]}>{item}</Text>
+            )}
           </Pressable>
         );
       })}
@@ -249,6 +314,7 @@ export function MacroProgress({
   const progress = goal > 0 ? Math.min(consumed / goal, 1) : 0;
   const remaining = goal - consumed;
   const color = macroColors[macro];
+  const gradient = macroGradients[macro];
 
   return (
     <Card style={styles.macroCard}>
@@ -259,7 +325,12 @@ export function MacroProgress({
         </Text>
       </View>
       <View style={[styles.progressTrack, { backgroundColor: theme.primarySoft }]}>
-        <View style={[styles.progressFill, { backgroundColor: color, width: `${progress * 100}%` }]} />
+        <LinearGradient
+          colors={gradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.progressFill, { width: `${progress * 100}%` }]}
+        />
       </View>
       <Text style={[styles.caption, { color: remaining < 0 ? theme.warning : theme.muted }]}>
         {remaining >= 0 ? `${Math.round(remaining)} ${unit} remaining` : `${Math.abs(Math.round(remaining))} ${unit} over`}
@@ -290,10 +361,14 @@ export function EmptyState({
 export function LoadingView({ label = 'Loading…' }: { label?: string }) {
   const theme = useAppTheme();
   return (
-    <View style={styles.loading}>
+    <LinearGradient
+      colors={theme.gradients.screen}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0.4, y: 1 }}
+      style={styles.loading}>
       <ActivityIndicator color={theme.primary} />
       <Text style={[styles.body, { color: theme.muted }]}>{label}</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -310,11 +385,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 5 },
+    overflow: 'hidden',
   },
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: radii.md,
+  },
+  heroWrap: {
+    borderRadius: radii.lg,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    overflow: 'hidden',
+  },
+  hero: {
+    borderRadius: radii.lg,
+    padding: spacing.xl,
+    gap: spacing.sm,
+  },
+  buttonWrap: { borderRadius: radii.pill, overflow: 'hidden' },
   button: {
     minHeight: 50,
     borderRadius: radii.pill,
     borderWidth: 1,
+    borderColor: 'transparent',
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
@@ -340,8 +434,15 @@ const styles = StyleSheet.create({
   caption: { fontSize: 13, lineHeight: 18 },
   body: { fontSize: 15, lineHeight: 22 },
   segmented: { flexDirection: 'row', borderRadius: radii.sm, padding: 3 },
-  segment: { flex: 1, paddingVertical: 9, paddingHorizontal: spacing.sm, borderRadius: 8, alignItems: 'center' },
-  segmentText: { fontSize: 13, fontWeight: '700' },
+  segment: { flex: 1, borderRadius: 8, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
+  segmentSelected: { shadowOpacity: 0.08, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
+  segmentGradient: {
+    paddingVertical: 9,
+    paddingHorizontal: spacing.sm,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  segmentText: { fontSize: 13, fontWeight: '700', textAlign: 'center', paddingVertical: 9, paddingHorizontal: spacing.sm },
   macroCard: { gap: spacing.md },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md, alignItems: 'baseline' },
   macroLabel: { fontSize: 17, fontWeight: '800' },
