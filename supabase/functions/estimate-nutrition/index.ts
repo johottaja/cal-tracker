@@ -7,6 +7,7 @@ const MAX_CAPTION_LENGTH = 1_000;
 const RATE_LIMIT_REQUESTS = 5;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const OPENAI_TIMEOUT_MS = 45_000;
+const MAX_OUTPUT_TOKENS = 4_096;
 const DEFAULT_MODEL = "gpt-5-mini-2025-08-07";
 const PRICING_VERSION = "openai-standard-2026-07-15-v1";
 
@@ -132,6 +133,9 @@ type Usage = {
 
 type OpenAIResponse = {
   status?: string;
+  incomplete_details?: {
+    reason?: string;
+  };
   model?: string;
   output?: unknown;
   usage?: {
@@ -536,7 +540,8 @@ async function callOpenAI(
             schema: ESTIMATE_SCHEMA,
           },
         },
-        max_output_tokens: 2_000,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
+        reasoning: { effort: "low" },
         store: false,
       }),
       signal: controller.signal,
@@ -579,6 +584,20 @@ async function callOpenAI(
 }
 
 function extractOutputText(response: OpenAIResponse): string {
+  if (response.status === "incomplete") {
+    const reason = response.incomplete_details?.reason ?? "unknown";
+    console.error("OpenAI response incomplete:", reason, {
+      outputTokens: response.usage?.output_tokens,
+    });
+    throw new HttpError(
+      502,
+      reason === "max_output_tokens"
+        ? "estimate_output_limit"
+        : "invalid_model_response",
+      "The estimate could not be validated.",
+    );
+  }
+
   if (response.status !== "completed" || !Array.isArray(response.output)) {
     throw new HttpError(
       502,
