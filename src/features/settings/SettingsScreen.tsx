@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -12,7 +13,7 @@ import {
   SegmentedControl,
 } from '@/components/ui';
 import type { MacroValues } from '@/domain/models';
-import { InlineNotice, StatusPill } from '@/features/shared/FeatureUI';
+import { ActionCard, InlineNotice, StatusPill } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
 import {
   useThemePreference,
@@ -47,6 +48,7 @@ function formatEur(amount: number): string {
 }
 
 export function SettingsScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { preference, setPreference } = useThemePreference();
   const {
@@ -175,6 +177,12 @@ export function SettingsScreen() {
       {message ? <InlineNotice>{message}</InlineNotice> : null}
 
       <Section title="Daily goals" detail="Applied to all comparisons">
+        <ActionCard
+          icon="calculator-outline"
+          title="Recalculate macros"
+          body="Run the calculator again from your body stats and goals."
+          onPress={() => router.push('/(modals)/macro-calculator')}
+        />
         <Card className="gap-4">
           <NumericField
             label="Calories (kcal)"

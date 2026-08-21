@@ -23,6 +23,7 @@ export default function ModalsLayout() {
       />
       <Stack.Screen name="manual-entry" options={{ title: 'Entry' }} />
       <Stack.Screen name="preset-editor" options={{ title: 'Preset' }} />
+      <Stack.Screen name="macro-calculator" options={{ title: 'Recalculate macros' }} />
     </Stack>
   );
 }

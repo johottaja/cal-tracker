@@ -69,17 +69,29 @@ export function Screen({
 export function Heading({
   title,
   subtitle,
+  centered = false,
 }: {
   title: string;
   subtitle?: string;
+  centered?: boolean;
 }) {
   return (
-    <View className="gap-1 pt-2">
-      <Text className="text-[32px] font-extrabold leading-9 tracking-tight text-foreground">
+    <View className={cn('gap-1 pt-2', centered && 'items-center')}>
+      <Text
+        className={cn(
+          'text-[32px] font-extrabold leading-9 tracking-tight text-foreground',
+          centered && 'text-center',
+        )}>
         {title}
       </Text>
       {subtitle ? (
-        <Text className="text-base leading-[22px] text-muted-foreground">{subtitle}</Text>
+        <Text
+          className={cn(
+            'text-base leading-[22px] text-muted-foreground',
+            centered && 'text-center',
+          )}>
+          {subtitle}
+        </Text>
       ) : null}
     </View>
   );
