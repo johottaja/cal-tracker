@@ -1,48 +1,24 @@
-import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppButton, EmptyState, Screen, Section } from '@/components/ui';
+import { Screen } from '@/components/ui';
 import { todayLocalDate } from '@/domain/dates';
 import { addMacros, zeroMacros } from '@/domain/macros';
-import type { FoodEntry } from '@/domain/models';
 import { MacroGauge } from '@/features/dashboard/MacroGauge';
 import {
-  ActionCard,
-  InlineNotice,
-  MacroSummary,
-  sourceLabels,
-} from '@/features/shared/FeatureUI';
+  JournalCard,
+  JournalEmpty,
+  QuickLogGrid,
+} from '@/features/dashboard/DashboardUI';
+import { InlineNotice } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
 
-function EntryRow({ entry }: { entry: FoodEntry }) {
-  const time = new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(entry.loggedAt));
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${entry.name}, ${entry.calories} calories, ${sourceLabels[entry.source]}`}
-      accessibilityHint="Opens entry details"
-      onPress={() => router.push({ pathname: '/entry-detail', params: { id: entry.id } })}
-      className="gap-3 rounded-md border border-border bg-card p-4 active:opacity-70">
-      <View className="flex-row justify-between gap-3">
-        <View className="flex-1 gap-1">
-          <Text className="text-[17px] font-extrabold leading-[21px] text-foreground" numberOfLines={2}>
-            {entry.name}
-          </Text>
-          <Text className="text-xs leading-4 text-muted-foreground">
-            {time} · {sourceLabels[entry.source]}
-          </Text>
-        </View>
-        <Text className="text-[15px] font-extrabold text-foreground">{entry.calories} kcal</Text>
-      </View>
-      <MacroSummary values={entry} compact />
-    </Pressable>
-  );
-}
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+});
 
 export function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -50,11 +26,9 @@ export function DashboardScreen() {
   const date = todayLocalDate();
   const entries = entriesForDate(date);
   const totals = useMemo(() => addMacros(zeroMacros(), ...entries), [entries]);
-  const dateLabel = new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date());
+  const dateLabel = dateFormatter.format(new Date());
+  const entryLabel = entries.length === 1 ? '1 meal' : `${entries.length} meals`;
+
   return (
     <Screen style={{ paddingTop: insets.top + 8 }}>
       {goals ? (
@@ -97,56 +71,22 @@ export function DashboardScreen() {
         </InlineNotice>
       ) : null}
 
-      <Section title="Log food">
-        <AppButton
-          label="Take a meal photo"
-          onPress={() => router.push('/capture-photo')}
-          accessibilityHint="Opens camera and photo selection"
-        />
-        <View className="gap-2">
-          <ActionCard
-            icon="sparkles-outline"
-            title="Describe"
-            body="Estimate from text"
-            onPress={() => router.push('/text-estimate')}
-          />
-          <ActionCard
-            icon="create-outline"
-            title="Manual"
-            body="Enter exact values"
-            onPress={() => router.push('/manual-entry')}
-          />
-          <ActionCard
-            icon="star-outline"
-            title="Presets"
-            body="Quick add favorites"
-            onPress={() => router.push('/presets')}
-          />
+      <View className="gap-6 pt-2">
+        <View className="gap-3">
+          <Text className="text-base font-extrabold tracking-tight text-foreground">Add a meal</Text>
+          <QuickLogGrid />
         </View>
-      </Section>
 
-      <Section title="Today’s entries" detail={`${entries.length} total`}>
-        {entries.length ? (
-          <View className="gap-2">
-            {entries.map((entry) => (
-              <EntryRow key={entry.id} entry={entry} />
-            ))}
+        <View className="gap-3">
+          <View className="flex-row items-baseline justify-between">
+            <Text className="text-base font-extrabold tracking-tight text-foreground">
+              Logged today
+            </Text>
+            <Text className="text-[13px] font-semibold text-muted-foreground">{entryLabel}</Text>
           </View>
-        ) : (
-          <EmptyState
-            title="Nothing logged yet"
-            body="Start with a photo, a description, a preset, or exact values."
-            action={
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push('/manual-entry')}
-                className="min-h-[44px] justify-center py-2 active:opacity-70">
-                <Text className="text-[15px] font-extrabold text-primary">Add your first entry</Text>
-              </Pressable>
-            }
-          />
-        )}
-      </Section>
+          {entries.length ? <JournalCard entries={entries} /> : <JournalEmpty />}
+        </View>
+      </View>
     </Screen>
   );
 }

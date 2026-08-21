@@ -85,14 +85,17 @@ export function InlineNotice({
   );
 }
 
+const DEFAULT_MACRO_KEYS: MacroKey[] = ['calories', 'proteinG', 'carbsG', 'fatG'];
+
 export function MacroSummary({
   values,
   compact = false,
+  keys = DEFAULT_MACRO_KEYS,
 }: {
   values: MacroValues;
   compact?: boolean;
+  keys?: readonly MacroKey[];
 }) {
-  const keys: MacroKey[] = ['calories', 'proteinG', 'carbsG', 'fatG'];
   return (
     <View
       accessibilityLabel={keys
