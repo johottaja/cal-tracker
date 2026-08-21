@@ -17,22 +17,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/constants/theme';
 import { cn } from '@/lib/cn';
 
-const macroTextClass = {
-  calories: 'text-macro-calories',
-  proteinG: 'text-macro-protein',
-  carbsG: 'text-macro-carbs',
-  fatG: 'text-macro-fat',
-} as const;
-
-const macroFillClass = {
-  calories: 'bg-macro-calories',
-  proteinG: 'bg-macro-protein',
-  carbsG: 'bg-macro-carbs',
-  fatG: 'bg-macro-fat',
-} as const;
-
-export type MacroTone = keyof typeof macroTextClass;
-
 export function Screen({
   children,
   scroll = true,
@@ -281,49 +265,6 @@ export function SegmentedControl<T extends string>({
         );
       })}
     </View>
-  );
-}
-
-export function MacroProgress({
-  label,
-  consumed,
-  goal,
-  unit,
-  macro,
-}: {
-  label: string;
-  consumed: number;
-  goal: number;
-  unit: string;
-  macro: MacroTone;
-}) {
-  const progress = goal > 0 ? Math.min(consumed / goal, 1) : 0;
-  const remaining = goal - consumed;
-
-  return (
-    <Card className="gap-3">
-      <View className="flex-row items-baseline justify-between gap-3">
-        <Text className="text-[17px] font-extrabold text-foreground">{label}</Text>
-        <Text className={cn('text-sm font-extrabold', macroTextClass[macro])}>
-          {Math.round(consumed)} / {Math.round(goal)} {unit}
-        </Text>
-      </View>
-      <View className="h-2 overflow-hidden rounded-full bg-primary-soft">
-        <View
-          className={cn('h-full rounded-full', macroFillClass[macro])}
-          style={{ width: `${progress * 100}%` }}
-        />
-      </View>
-      <Text
-        className={cn(
-          'text-[13px] leading-[18px]',
-          remaining < 0 ? 'text-warning' : 'text-muted-foreground',
-        )}>
-        {remaining >= 0
-          ? `${Math.round(remaining)} ${unit} remaining`
-          : `${Math.abs(Math.round(remaining))} ${unit} over`}
-      </Text>
-    </Card>
   );
 }
 
