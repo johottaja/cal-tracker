@@ -1,49 +1,43 @@
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { StyleSheet, Text } from 'react-native';
+import { useColorScheme } from 'react-native';
 
-import { useAppTheme } from '@/constants/theme';
-
-const icons = {
-  index: '⌂',
-  log: '＋',
-  history: '⌁',
-  settings: '⚙',
-} as const;
+const screens = [
+  { name: 'index', title: 'Home', icon: 'home-outline', iconFocused: 'home' },
+  { name: 'log', title: 'Log', icon: 'add-circle-outline', iconFocused: 'add-circle' },
+  { name: 'history', title: 'History', icon: 'stats-chart-outline', iconFocused: 'stats-chart' },
+  { name: 'settings', title: 'Settings', icon: 'settings-outline', iconFocused: 'settings' },
+] as const;
 
 export default function TabsLayout() {
-  const theme = useAppTheme();
+  const isDark = useColorScheme() === 'dark';
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: theme.muted,
+        tabBarActiveTintColor: isDark ? '#7fbe9b' : '#2f6b4f',
+        tabBarInactiveTintColor: isDark ? '#c5ceca' : '#4a5557',
         tabBarStyle: {
-          borderTopColor: theme.border,
+          borderTopColor: isDark ? '#3a4743' : '#d5d0c4',
+          backgroundColor: isDark ? '#141b19' : '#fffaf2',
           height: 84,
-          paddingTop: 7,
-          backgroundColor: 'transparent',
+          paddingTop: 6,
         },
-        tabBarBackground: () => (
-          <LinearGradient
-            colors={theme.gradients.tabBar}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
-        ),
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
       }}>
-      {Object.entries(icons).map(([name, icon]) => (
+      {screens.map((screen) => (
         <Tabs.Screen
-          key={name}
-          name={name}
+          key={screen.name}
+          name={screen.name}
           options={{
-            title: name === 'index' ? 'Home' : `${name[0]?.toUpperCase()}${name.slice(1)}`,
-            tabBarAccessibilityLabel: `${name === 'index' ? 'Home' : name} tab`,
-            tabBarIcon: ({ color, focused }) => (
-              <Text style={[styles.icon, { color }, focused && styles.focused]}>{icon}</Text>
+            title: screen.title,
+            tabBarAccessibilityLabel: `${screen.title} tab`,
+            tabBarIcon: ({ color, focused, size }) => (
+              <Ionicons
+                name={focused ? screen.iconFocused : screen.icon}
+                color={color}
+                size={size}
+              />
             ),
           }}
         />
@@ -51,8 +45,3 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  icon: { fontSize: 22, lineHeight: 25, fontWeight: '700' },
-  focused: { transform: [{ scale: 1.05 }] },
-});

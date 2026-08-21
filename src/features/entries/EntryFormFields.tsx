@@ -1,7 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Field, NumericField } from '@/components/ui';
-import { spacing } from '@/constants/theme';
 
 export type EntryFormValue = {
   name: string;
@@ -56,7 +55,7 @@ export function EntryFormFields({
     onChange({ ...value, [key]: next });
 
   return (
-    <View style={styles.container}>
+    <View className="gap-4">
       <Field
         label="Name"
         placeholder="What did you eat?"
@@ -64,12 +63,12 @@ export function EntryFormFields({
         onChangeText={update('name')}
         autoCapitalize="sentences"
       />
-      <View style={styles.grid}>
-        <View style={styles.column}>
+      <View className="flex-row gap-3">
+        <View className="flex-1 gap-3">
           <NumericField label="Calories (kcal)" value={value.calories} onChangeText={update('calories')} integer />
           <NumericField label="Carbohydrates (g)" value={value.carbsG} onChangeText={update('carbsG')} />
         </View>
-        <View style={styles.column}>
+        <View className="flex-1 gap-3">
           <NumericField label="Protein (g)" value={value.proteinG} onChangeText={update('proteinG')} />
           <NumericField label="Fat (g)" value={value.fatG} onChangeText={update('fatG')} />
         </View>
@@ -91,9 +90,3 @@ export function EntryFormFields({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { gap: spacing.lg },
-  grid: { flexDirection: 'row', gap: spacing.md },
-  column: { flex: 1, gap: spacing.md },
-});

@@ -1,6 +1,5 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import {
   AppButton,
@@ -11,7 +10,6 @@ import {
   Screen,
   SegmentedControl,
 } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
 
 export type GoalInput = {
   calories: number;
@@ -49,7 +47,6 @@ export function OnboardingScreen({
   ) => Promise<EmailSignUpStatus | undefined>;
   onSaveGoals: (goals: GoalInput) => Promise<void>;
 }) {
-  const theme = useAppTheme();
   const [values, setValues] = useState(defaults);
   const [authMode, setAuthMode] = useState<AuthMode>('Sign in');
   const [email, setEmail] = useState('');
@@ -91,15 +88,11 @@ export function OnboardingScreen({
   };
 
   return (
-    <Screen style={styles.screen}>
-      <View style={styles.brand}>
-        <LinearGradient
-          colors={theme.gradients.primary}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.mark}>
-          <Text style={styles.markText}>C</Text>
-        </LinearGradient>
+    <Screen style={{ justifyContent: 'center', paddingTop: 48 }}>
+      <View className="gap-6">
+        <View className="h-16 w-16 items-center justify-center rounded-lg bg-primary">
+          <Text className="text-[30px] font-black text-primary-foreground">C</Text>
+        </View>
         <Heading
           title={signedIn ? 'Set your daily goals' : 'Eat with clarity'}
           subtitle={
@@ -111,7 +104,7 @@ export function OnboardingScreen({
       </View>
 
       {signedIn ? (
-        <Card style={styles.form}>
+        <Card className="gap-4">
           <NumericField
             label="Calories (kcal)"
             value={values.calories}
@@ -136,9 +129,9 @@ export function OnboardingScreen({
           <AppButton label="Start tracking" onPress={() => void submitGoals()} loading={busy} />
         </Card>
       ) : (
-        <Card style={styles.signInCard}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Your data follows you</Text>
-          <Text style={[styles.body, { color: theme.muted }]}>
+        <Card className="gap-4">
+          <Text className="text-xl font-extrabold text-foreground">Your data follows you</Text>
+          <Text className="text-base leading-[23px] text-muted-foreground">
             Sign in to keep your private nutrition history in Supabase and restore it after
             reinstalling.
           </Text>
@@ -177,10 +170,14 @@ export function OnboardingScreen({
             editable={!busy}
           />
           {validationError ? (
-            <Text style={[styles.inlineMessage, { color: theme.error }]}>{validationError}</Text>
+            <Text accessibilityRole="alert" className="text-[13px] leading-[18px] text-destructive">
+              {validationError}
+            </Text>
           ) : null}
           {authNotice ? (
-            <Text style={[styles.inlineMessage, { color: theme.success }]}>{authNotice}</Text>
+            <Text accessibilityRole="alert" className="text-[13px] leading-[18px] text-success">
+              {authNotice}
+            </Text>
           ) : null}
           <AppButton
             label={authMode}
@@ -188,27 +185,17 @@ export function OnboardingScreen({
             loading={busy}
             disabled={busy}
           />
-          <Text style={[styles.note, { color: theme.muted }]}>
+          <Text className="text-center text-[13px] leading-[18px] text-muted-foreground">
             After your first sync, logging and history remain available offline.
           </Text>
         </Card>
       )}
 
-      {error ? <Text style={[styles.error, { color: theme.error }]}>{error}</Text> : null}
+      {error ? (
+        <Text accessibilityRole="alert" className="text-center text-sm leading-5 text-destructive">
+          {error}
+        </Text>
+      ) : null}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { justifyContent: 'center', paddingTop: spacing.huge },
-  brand: { gap: spacing.xl },
-  mark: { width: 64, height: 64, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-  markText: { color: '#FFFFFF', fontSize: 30, fontWeight: '900' },
-  form: { gap: spacing.lg },
-  signInCard: { gap: spacing.lg },
-  cardTitle: { fontSize: 20, fontWeight: '800' },
-  body: { fontSize: 16, lineHeight: 23 },
-  note: { fontSize: 13, lineHeight: 18, textAlign: 'center' },
-  inlineMessage: { fontSize: 13, lineHeight: 18 },
-  error: { fontSize: 14, lineHeight: 20, textAlign: 'center' },
-});

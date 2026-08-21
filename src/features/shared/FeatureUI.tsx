@@ -1,10 +1,10 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { PropsWithChildren, ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
+import { AppIcon, type AppIconName } from '@/components/AppIcon';
 import { Card } from '@/components/ui';
-import { macroColors, radii, spacing, useAppTheme } from '@/constants/theme';
 import type { FoodEntrySource, MacroKey, MacroValues } from '@/domain/models';
+import { cn } from '@/lib/cn';
 
 export const macroMeta: Record<
   MacroKey,
@@ -23,6 +23,13 @@ export const sourceLabels: Record<FoodEntrySource, string> = {
   ai_photo: 'Photo estimate',
 };
 
+const macroValueClass: Record<MacroKey, string> = {
+  calories: 'text-macro-calories',
+  proteinG: 'text-macro-protein',
+  carbsG: 'text-macro-carbs',
+  fatG: 'text-macro-fat',
+};
+
 export function ActionCard({
   icon,
   title,
@@ -31,43 +38,28 @@ export function ActionCard({
   trailing,
   accessibilityHint,
 }: {
-  icon: string;
+  icon: AppIconName;
   title: string;
   body: string;
   onPress: () => void;
   trailing?: ReactNode;
   accessibilityHint?: string;
 }) {
-  const theme = useAppTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={title}
       accessibilityHint={accessibilityHint ?? body}
       onPress={onPress}
-      style={({ pressed }) => [styles.action, { borderColor: theme.border }, pressed && styles.pressed]}>
-      <LinearGradient
-        colors={theme.gradients.card}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.actionGradient}
-      />
-      <LinearGradient
-        colors={theme.gradients.icon}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.icon}>
-        <Text
-          style={[styles.iconText, { color: theme.onPrimarySoft }]}
-          importantForAccessibility="no">
-          {icon}
-        </Text>
-      </LinearGradient>
-      <View style={styles.actionCopy}>
-        <Text style={[styles.actionTitle, { color: theme.text }]}>{title}</Text>
-        <Text style={[styles.body, { color: theme.muted }]}>{body}</Text>
+      className="min-h-[82px] flex-row items-center gap-3 overflow-hidden rounded-md border border-border bg-card p-3 active:opacity-70">
+      <View className="h-12 w-12 items-center justify-center rounded-md bg-primary-soft">
+        <AppIcon name={icon} size={22} className="text-primary" />
       </View>
-      {trailing ?? <Text style={[styles.chevron, { color: theme.muted }]}>›</Text>}
+      <View className="flex-1 gap-0.5">
+        <Text className="text-[17px] font-extrabold leading-[21px] text-foreground">{title}</Text>
+        <Text className="text-sm leading-5 text-muted-foreground">{body}</Text>
+      </View>
+      {trailing ?? <AppIcon name="chevron-forward" size={18} className="text-muted-foreground" />}
     </Pressable>
   );
 }
@@ -77,20 +69,17 @@ export function InlineNotice({
   children,
   action,
 }: PropsWithChildren<{ kind?: 'info' | 'error' | 'offline' | 'success'; action?: ReactNode }>) {
-  const theme = useAppTheme();
-  const accent =
-    kind === 'error'
-      ? theme.error
-      : kind === 'success'
-        ? theme.success
-        : kind === 'offline'
-          ? theme.warning
-          : theme.primary;
   return (
     <View
       accessibilityRole="alert"
-      style={[styles.notice, { backgroundColor: theme.surface, borderColor: accent }]}>
-      <Text style={[styles.body, styles.noticeText, { color: theme.text }]}>{children}</Text>
+      className={cn(
+        'flex-row items-center gap-3 rounded-sm border bg-card p-3',
+        kind === 'error' && 'border-destructive',
+        kind === 'success' && 'border-success',
+        kind === 'offline' && 'border-warning',
+        kind === 'info' && 'border-primary',
+      )}>
+      <Text className="flex-1 text-sm leading-5 text-foreground">{children}</Text>
       {action}
     </View>
   );
@@ -103,21 +92,20 @@ export function MacroSummary({
   values: MacroValues;
   compact?: boolean;
 }) {
-  const theme = useAppTheme();
   const keys: MacroKey[] = ['calories', 'proteinG', 'carbsG', 'fatG'];
   return (
     <View
       accessibilityLabel={keys
         .map((key) => `${macroMeta[key].label} ${values[key]} ${macroMeta[key].unit}`)
         .join(', ')}
-      style={[styles.macroRow, compact && styles.macroRowCompact]}>
+      className={cn('flex-row justify-between gap-2', compact && 'mt-1')}>
       {keys.map((key) => (
-        <View key={key} style={styles.macroItem}>
-          <Text style={[styles.macroValue, { color: macroColors[key] }]}>
+        <View key={key} className="flex-1 gap-0.5">
+          <Text className={cn('text-[15px] font-extrabold leading-[19px]', macroValueClass[key])}>
             {values[key]}
             {key === 'calories' ? '' : 'g'}
           </Text>
-          <Text style={[styles.caption, { color: theme.muted }]}>
+          <Text className="text-[11px] font-semibold leading-[15px] text-muted-foreground">
             {macroMeta[key].shortLabel}
           </Text>
         </View>
@@ -133,72 +121,30 @@ export function StatusPill({
   label: string;
   tone?: 'neutral' | 'positive' | 'warning';
 }) {
-  const theme = useAppTheme();
-  const color =
-    tone === 'positive' ? theme.success : tone === 'warning' ? theme.warning : theme.muted;
   return (
-    <View style={[styles.pill, { borderColor: color }]}>
-      <Text style={[styles.pillText, { color }]}>{label}</Text>
+    <View
+      className={cn(
+        'self-start rounded-full border px-2 py-1',
+        tone === 'positive' && 'border-success',
+        tone === 'warning' && 'border-warning',
+        tone === 'neutral' && 'border-muted-foreground',
+      )}>
+      <Text
+        className={cn(
+          'text-xs font-bold leading-[15px]',
+          tone === 'positive' && 'text-success',
+          tone === 'warning' && 'text-warning',
+          tone === 'neutral' && 'text-muted-foreground',
+        )}>
+        {label}
+      </Text>
     </View>
   );
 }
 
 export function MiniCard({
   children,
-  style,
-}: PropsWithChildren<{ style?: ViewStyle }>) {
-  return <Card style={style ? { ...styles.miniCard, ...style } : styles.miniCard}>{children}</Card>;
+  className,
+}: PropsWithChildren<{ className?: string }>) {
+  return <Card className={cn('p-3', className)}>{children}</Card>;
 }
-
-const styles = StyleSheet.create({
-  action: {
-    minHeight: 82,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: radii.md,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    overflow: 'hidden',
-  },
-  actionGradient: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: radii.md,
-  },
-  pressed: { opacity: 0.7, transform: [{ scale: 0.99 }] },
-  icon: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconText: { fontSize: 23 },
-  actionCopy: { flex: 1, gap: 3 },
-  actionTitle: { fontSize: 17, lineHeight: 21, fontWeight: '800' },
-  body: { fontSize: 14, lineHeight: 20 },
-  chevron: { fontSize: 28, lineHeight: 30 },
-  notice: {
-    borderWidth: 1,
-    borderRadius: radii.sm,
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  noticeText: { flex: 1 },
-  macroRow: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.sm },
-  macroRowCompact: { marginTop: spacing.xs },
-  macroItem: { flex: 1, gap: 2 },
-  macroValue: { fontSize: 15, lineHeight: 19, fontWeight: '800' },
-  caption: { fontSize: 11, lineHeight: 15, fontWeight: '600' },
-  pill: {
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderRadius: radii.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  pillText: { fontSize: 12, lineHeight: 15, fontWeight: '700' },
-  miniCard: { padding: spacing.md },
-});

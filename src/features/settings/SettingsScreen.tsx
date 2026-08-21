@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -11,7 +11,6 @@ import {
   Section,
   SegmentedControl,
 } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
 import type { MacroValues } from '@/domain/models';
 import { InlineNotice, StatusPill } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
@@ -48,7 +47,6 @@ function formatEur(amount: number): string {
 }
 
 export function SettingsScreen() {
-  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { preference, setPreference } = useThemePreference();
   const {
@@ -171,21 +169,21 @@ export function SettingsScreen() {
         : 'Unavailable';
 
   return (
-    <Screen style={{ paddingTop: insets.top + spacing.sm }}>
+    <Screen style={{ paddingTop: insets.top + 8 }}>
       <Heading title="Settings" subtitle="Goals, account recovery, sync, and privacy." />
       {!online ? <InlineNotice kind="offline">You’re offline. Local settings still work.</InlineNotice> : null}
       {message ? <InlineNotice>{message}</InlineNotice> : null}
 
       <Section title="Daily goals" detail="Applied to all comparisons">
-        <Card style={styles.form}>
+        <Card className="gap-4">
           <NumericField
             label="Calories (kcal)"
             value={form.calories}
             onChangeText={updateGoal('calories')}
             integer
           />
-          <View style={styles.goalRow}>
-            <View style={styles.flex}>
+          <View className="flex-row gap-3">
+            <View className="flex-1 gap-3">
               <NumericField
                 label="Protein (g)"
                 value={form.proteinG}
@@ -197,7 +195,7 @@ export function SettingsScreen() {
                 onChangeText={updateGoal('carbsG')}
               />
             </View>
-            <View style={styles.flex}>
+            <View className="flex-1 gap-3">
               <NumericField label="Fat (g)" value={form.fatG} onChangeText={updateGoal('fatG')} />
             </View>
           </View>
@@ -210,13 +208,13 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Account">
-        <Card style={styles.card}>
-          <View style={styles.rowBetween}>
-            <View style={styles.flex}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>
+        <Card className="gap-4">
+          <View className="flex-row items-start gap-3">
+            <View className="flex-1 gap-3">
+              <Text className="text-[17px] font-extrabold leading-[22px] text-foreground">
                 {user?.email ?? 'Signed-in account'}
               </Text>
-              <Text style={[styles.body, { color: theme.muted }]}>
+              <Text className="text-sm leading-[21px] text-muted-foreground">
                 Your identity restores private cloud-backed data after reinstalling.
               </Text>
             </View>
@@ -237,11 +235,13 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Sync" detail={`${syncStatus.pendingCount} pending`}>
-        <Card style={styles.card}>
-          <View style={styles.rowBetween}>
-            <View style={styles.flex}>
-              <Text style={[styles.cardTitle, { color: theme.text }]}>Private cloud backup</Text>
-              <Text style={[styles.body, { color: theme.muted }]}>
+        <Card className="gap-4">
+          <View className="flex-row items-start gap-3">
+            <View className="flex-1 gap-3">
+              <Text className="text-[17px] font-extrabold leading-[22px] text-foreground">
+                Private cloud backup
+              </Text>
+              <Text className="text-sm leading-[21px] text-muted-foreground">
                 Last successful sync: {syncTime}
               </Text>
             </View>
@@ -266,7 +266,7 @@ export function SettingsScreen() {
             loading={busy === 'sync'}
             disabled={!online}
           />
-          <Text style={[styles.note, { color: theme.muted }]}>
+          <Text className="text-xs leading-[18px] text-muted-foreground">
             Entries, presets, and goals are cached on this device first, then backed up to your
             owner-only Supabase account.
           </Text>
@@ -274,17 +274,21 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Estimated OpenAI API cost">
-        <Card style={styles.costCard}>
-          <View style={styles.costItem}>
-            <Text style={[styles.costLabel, { color: theme.muted }]}>This month</Text>
-            <Text style={[styles.costValue, { color: theme.text }]}>{monthCost}</Text>
+        <Card className="gap-4">
+          <View className="gap-1">
+            <Text className="text-[13px] font-bold text-muted-foreground">This month</Text>
+            <Text className="text-[28px] font-black leading-[34px] tracking-tight text-foreground">
+              {monthCost}
+            </Text>
           </View>
-          <View style={[styles.divider, { backgroundColor: theme.border }]} />
-          <View style={styles.costItem}>
-            <Text style={[styles.costLabel, { color: theme.muted }]}>This year</Text>
-            <Text style={[styles.costValue, { color: theme.text }]}>{yearCost}</Text>
+          <View className="h-px bg-border" />
+          <View className="gap-1">
+            <Text className="text-[13px] font-bold text-muted-foreground">This year</Text>
+            <Text className="text-[28px] font-black leading-[34px] tracking-tight text-foreground">
+              {yearCost}
+            </Text>
           </View>
-          <Text style={[styles.note, { color: theme.muted }]}>
+          <Text className="text-xs leading-[18px] text-muted-foreground">
             {costSummary
               ? `Last refreshed ${new Intl.DateTimeFormat(undefined, {
                   dateStyle: 'medium',
@@ -301,9 +305,9 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Appearance">
-        <Card style={styles.card}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Color mode</Text>
-          <Text style={[styles.body, { color: theme.muted }]}>
+        <Card className="gap-4">
+          <Text className="text-[17px] font-extrabold leading-[22px] text-foreground">Color mode</Text>
+          <Text className="text-sm leading-[21px] text-muted-foreground">
             Choose light, dark, or match your iPhone settings.
           </Text>
           <SegmentedControl
@@ -317,13 +321,15 @@ export function SettingsScreen() {
       </Section>
 
       <Section title="Privacy">
-        <Card style={styles.card}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>Your nutrition data is private</Text>
-          <Text style={[styles.body, { color: theme.muted }]}>
+        <Card className="gap-4">
+          <Text className="text-[17px] font-extrabold leading-[22px] text-foreground">
+            Your nutrition data is private
+          </Text>
+          <Text className="text-sm leading-[21px] text-muted-foreground">
             Supabase stores your cloud copy with owner-only access controls. Your device keeps an
             offline cache tied to the signed-in account.
           </Text>
-          <Text style={[styles.body, { color: theme.muted }]}>
+          <Text className="text-sm leading-[21px] text-muted-foreground">
             Meal photos are resized and sent to OpenAI only after you tap Analyze. Cal Tracker does
             not retain the original image, encoded image, or raw AI response after review.
           </Text>
@@ -332,19 +338,3 @@ export function SettingsScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  form: { gap: spacing.lg },
-  card: { gap: spacing.lg },
-  goalRow: { flexDirection: 'row', gap: spacing.md },
-  flex: { flex: 1, gap: spacing.md },
-  rowBetween: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
-  cardTitle: { fontSize: 17, lineHeight: 22, fontWeight: '800' },
-  body: { fontSize: 14, lineHeight: 21 },
-  note: { fontSize: 12, lineHeight: 18 },
-  costCard: { gap: spacing.lg },
-  costItem: { gap: spacing.xs },
-  costLabel: { fontSize: 13, fontWeight: '700' },
-  costValue: { fontSize: 28, lineHeight: 34, fontWeight: '900', letterSpacing: -0.5 },
-  divider: { height: StyleSheet.hairlineWidth },
-});

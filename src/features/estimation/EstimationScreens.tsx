@@ -2,10 +2,10 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/AppIcon';
 import { AppButton, Card, Field, Heading, Screen } from '@/components/ui';
-import { radii, spacing, useAppTheme } from '@/constants/theme';
 import { todayLocalDate } from '@/domain/dates';
 import { InlineNotice } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
@@ -19,7 +19,6 @@ function estimationError(caught: unknown): string {
 }
 
 export function TextEstimateScreen() {
-  const theme = useAppTheme();
   const { online, user, estimateText, setReviewDraft } = useApp();
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +55,7 @@ export function TextEstimateScreen() {
         confidence: estimate.confidence,
         assumptions: estimate.assumptions,
       });
-      router.push('/review-entry');
+      router.replace('/review-entry');
     } catch (caught) {
       setError(estimationError(caught));
     } finally {
@@ -75,7 +74,7 @@ export function TextEstimateScreen() {
         <InlineNotice kind="offline">You’re offline. AI analysis is unavailable.</InlineNotice>
       ) : null}
       {error ? <InlineNotice kind="error">{error}</InlineNotice> : null}
-      <Card style={styles.form}>
+      <Card className="gap-4">
         <Field
           label="Describe the food and portion"
           placeholder="e.g. Chicken pasta, one medium bowl"
@@ -87,7 +86,7 @@ export function TextEstimateScreen() {
           autoFocus
           accessibilityHint="Include a serving size for a better estimate"
         />
-        <Text style={[styles.note, { color: theme.muted }]}>
+        <Text className="text-[13px] leading-[19px] text-muted-foreground">
           You’ll always review and edit the estimate before it is saved.
         </Text>
       </Card>
@@ -111,7 +110,6 @@ type SelectedImage = {
 };
 
 export function CapturePhotoScreen() {
-  const theme = useAppTheme();
   const { online, user, estimatePhoto, setReviewDraft } = useApp();
   const [image, setImage] = useState<SelectedImage | null>(null);
   const [context, setContext] = useState('');
@@ -197,7 +195,7 @@ export function CapturePhotoScreen() {
         assumptions: estimate.assumptions,
       });
       setImage(null);
-      router.push('/review-entry');
+      router.replace('/review-entry');
     } catch (caught) {
       setError(estimationError(caught));
     } finally {
@@ -220,12 +218,12 @@ export function CapturePhotoScreen() {
       {error ? <InlineNotice kind="error">{error}</InlineNotice> : null}
 
       {image ? (
-        <Card style={styles.previewCard}>
+        <Card className="gap-3 p-3">
           <Image
             source={{ uri: image.uri }}
             resizeMode="cover"
             accessibilityLabel="Selected meal photo"
-            style={styles.preview}
+            className="aspect-[4/3] w-full rounded-sm"
           />
           <AppButton
             label="Choose a different photo"
@@ -235,22 +233,20 @@ export function CapturePhotoScreen() {
           />
         </Card>
       ) : (
-        <View style={[styles.placeholder, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-          <Text style={styles.cameraIcon} importantForAccessibility="no">
-            ◉
-          </Text>
-          <Text style={[styles.placeholderTitle, { color: theme.text }]}>No photo selected</Text>
-          <Text style={[styles.note, { color: theme.muted }]}>
+        <View className="aspect-[4/3] items-center justify-center gap-2 rounded-md border border-dashed border-border bg-card px-6">
+          <AppIcon name="camera-outline" size={36} className="text-muted-foreground" />
+          <Text className="text-lg font-extrabold text-foreground">No photo selected</Text>
+          <Text className="text-center text-[13px] leading-[19px] text-muted-foreground">
             Photos are processed only after you tap Analyze meal.
           </Text>
         </View>
       )}
 
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonColumn}>
+      <View className="flex-row gap-2">
+        <View className="flex-1">
           <AppButton label="Open camera" onPress={() => void choose('camera')} disabled={loading} />
         </View>
-        <View style={styles.buttonColumn}>
+        <View className="flex-1">
           <AppButton
             label="Choose photo"
             variant="secondary"
@@ -285,24 +281,3 @@ export function CapturePhotoScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  form: { gap: spacing.lg },
-  note: { fontSize: 13, lineHeight: 19 },
-  previewCard: { gap: spacing.md, padding: spacing.md },
-  preview: { width: '100%', aspectRatio: 4 / 3, borderRadius: radii.sm },
-  placeholder: {
-    aspectRatio: 4 / 3,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderRadius: radii.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.sm,
-  },
-  cameraIcon: { fontSize: 42 },
-  placeholderTitle: { fontSize: 18, fontWeight: '800' },
-  buttonRow: { flexDirection: 'row', gap: spacing.sm },
-  buttonColumn: { flex: 1 },
-});

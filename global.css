@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Semantic tokens for light/dark. NativeWind applies `.dark` from colorScheme.
+  Keep hex values in sync with src/constants/theme.ts (SVG + native headers).
+*/
+:root {
+  --color-background: #f3eee4;
+  --color-foreground: #182022;
+  --color-card: #fffdf8;
+  --color-card-foreground: #182022;
+  --color-elevated: #ffffff;
+  --color-muted: #e7efe8;
+  --color-muted-foreground: #4a5557;
+  --color-border: #d5d0c4;
+  --color-primary: #2f6b4f;
+  --color-primary-foreground: #ffffff;
+  --color-primary-soft: #d7e8dd;
+  --color-accent: #d9773a;
+  --color-accent-foreground: #ffffff;
+  --color-success: #2f6b4f;
+  --color-warning: #a57b18;
+  --color-destructive: #b42318;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: #2f6b4f;
+  --color-hero: #2f6b4f;
+  --color-hero-foreground: #ffffff;
+  --color-hero-muted: rgba(255, 255, 255, 0.82);
+  --color-tab-bar: #fffaf2;
+  --color-macro-calories: #d9773a;
+  --color-macro-protein: #3d7396;
+  --color-macro-carbs: #a57b18;
+  --color-macro-fat: #7a5278;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+}
+
+.dark {
+  --color-background: #0f1413;
+  --color-foreground: #f4f0e6;
+  --color-card: #18201e;
+  --color-card-foreground: #f4f0e6;
+  --color-elevated: #222c29;
+  --color-muted: #233b30;
+  --color-muted-foreground: #c5ceca;
+  --color-border: #3a4743;
+  --color-primary: #7fbe9b;
+  --color-primary-foreground: #0f1413;
+  --color-primary-soft: #1d3329;
+  --color-accent: #f0a06c;
+  --color-accent-foreground: #0f1413;
+  --color-success: #7fbe9b;
+  --color-warning: #e2bd5c;
+  --color-destructive: #f2a4a0;
+  --color-destructive-foreground: #0f1413;
+  --color-ring: #7fbe9b;
+  --color-hero: #254636;
+  --color-hero-foreground: #f4f0e6;
+  --color-hero-muted: rgba(244, 240, 230, 0.78);
+  --color-tab-bar: #141b19;
+  --color-macro-calories: #f0a06c;
+  --color-macro-protein: #7eb0d0;
+  --color-macro-carbs: #e2bd5c;
+  --color-macro-fat: #c4a0c0;
+}

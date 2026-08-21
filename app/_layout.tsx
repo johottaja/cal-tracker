@@ -1,17 +1,18 @@
+import '../global.css';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useState, type PropsWithChildren } from 'react';
 import { Text, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppButton, LoadingView } from '@/components/ui';
-import { useAppTheme } from '@/constants/theme';
 import { OnboardingScreen } from '@/features/auth/OnboardingScreen';
+import { cn } from '@/lib/cn';
 import { AppProvider, useApp } from '@/providers/AppProvider';
 import { ThemePreferenceProvider } from '@/providers/ThemePreferenceProvider';
 
 function RootNavigator() {
-  const theme = useAppTheme();
   const colorScheme = useColorScheme();
   const {
     ready,
@@ -45,16 +46,8 @@ function RootNavigator() {
 
   if (error) {
     return (
-      <View
-        style={{
-          flex: 1,
-          padding: 24,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
-          backgroundColor: theme.background,
-        }}>
-        <Text accessibilityRole="alert" style={{ color: theme.error, fontSize: 16, textAlign: 'center' }}>
+      <View className="flex-1 items-center justify-center gap-4 bg-background px-6">
+        <Text accessibilityRole="alert" className="text-center text-base text-destructive">
           {error}
         </Text>
         <AppButton label="Try again" onPress={() => void refresh()} />
@@ -79,30 +72,36 @@ function RootNavigator() {
     );
   }
 
+  const isDark = colorScheme === 'dark';
+
   return (
     <>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerBackTitle: 'Back',
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: theme.background },
-          headerTintColor: theme.text,
-          contentStyle: { backgroundColor: theme.background },
+          headerStyle: { backgroundColor: isDark ? '#0f1413' : '#f3eee4' },
+          headerTintColor: isDark ? '#f4f0e6' : '#182022',
+          contentStyle: { backgroundColor: isDark ? '#0f1413' : '#f3eee4' },
           headerTitleStyle: { fontWeight: '700' },
         }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="capture-photo" options={{ title: 'Meal photo', presentation: 'modal' }} />
-        <Stack.Screen name="text-estimate" options={{ title: 'Text estimate', presentation: 'modal' }} />
-        <Stack.Screen name="review-entry" options={{ title: 'Review', presentation: 'modal', gestureEnabled: false }} />
-        <Stack.Screen name="manual-entry" options={{ title: 'Entry', presentation: 'modal' }} />
+        <Stack.Screen
+          name="(modals)"
+          options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }}
+        />
         <Stack.Screen name="entry-detail" options={{ title: 'Entry detail' }} />
         <Stack.Screen name="presets" options={{ title: 'Presets' }} />
-        <Stack.Screen name="preset-editor" options={{ title: 'Preset', presentation: 'modal' }} />
         <Stack.Screen name="day-detail" options={{ title: 'Day detail' }} />
       </Stack>
     </>
   );
+}
+
+function ThemedRoot({ children }: PropsWithChildren) {
+  const isDark = useColorScheme() === 'dark';
+  return <View className={cn('flex-1 bg-background', isDark && 'dark')}>{children}</View>;
 }
 
 export default function RootLayout() {
@@ -110,7 +109,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemePreferenceProvider>
         <AppProvider>
-          <RootNavigator />
+          <ThemedRoot>
+            <RootNavigator />
+          </ThemedRoot>
         </AppProvider>
       </ThemePreferenceProvider>
     </SafeAreaProvider>

@@ -1,10 +1,9 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppButton, EmptyState, Heading, Screen, Section } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
 import type { Preset } from '@/domain/models';
 import { ActionCard, InlineNotice, MacroSummary } from '@/features/shared/FeatureUI';
 import { useApp } from '@/providers/AppProvider';
@@ -16,35 +15,34 @@ function FavoritePreset({
   preset: Preset;
   onQuickAdd: (preset: Preset) => void;
 }) {
-  const theme = useAppTheme();
   return (
-    <View style={[styles.preset, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View className="overflow-hidden rounded-md border border-border bg-card">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Quick add ${preset.name}`}
         accessibilityHint="Logs this preset for today"
         onPress={() => onQuickAdd(preset)}
-        style={({ pressed }) => [styles.presetMain, pressed && styles.pressed]}>
-        <View style={styles.presetHeader}>
-          <View style={styles.presetTitle}>
-            <Text style={[styles.presetName, { color: theme.text }]}>{preset.name}</Text>
+        className="gap-3 p-4 active:opacity-70">
+        <View className="flex-row justify-between gap-3">
+          <View className="flex-1 gap-0.5">
+            <Text className="text-[17px] font-extrabold leading-[21px] text-foreground">
+              {preset.name}
+            </Text>
             {preset.servingLabel ? (
-              <Text style={[styles.caption, { color: theme.muted }]}>{preset.servingLabel}</Text>
+              <Text className="text-xs leading-4 text-muted-foreground">{preset.servingLabel}</Text>
             ) : null}
           </View>
-          <Text style={[styles.add, { color: theme.primary }]}>＋ Add</Text>
+          <Text className="text-sm font-extrabold text-primary">Add</Text>
         </View>
         <MacroSummary values={preset} compact />
       </Pressable>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Edit ${preset.name}`}
-        onPress={() =>
-          router.push({ pathname: '/preset-editor', params: { id: preset.id } })
-        }
+        onPress={() => router.push({ pathname: '/preset-editor', params: { id: preset.id } })}
         hitSlop={8}
-        style={styles.edit}>
-        <Text style={[styles.editText, { color: theme.muted }]}>Edit preset</Text>
+        className="min-h-[44px] items-start justify-center px-4 active:opacity-70">
+        <Text className="text-[13px] font-bold text-muted-foreground">Edit preset</Text>
       </Pressable>
     </View>
   );
@@ -75,7 +73,7 @@ export function LogScreen() {
   };
 
   return (
-    <Screen style={{ paddingTop: insets.top + spacing.sm }}>
+    <Screen style={{ paddingTop: insets.top + 8 }}>
       <Heading title="Log" subtitle="Choose the fastest way to capture what you ate." />
       {!online ? (
         <InlineNotice kind="offline">
@@ -91,15 +89,15 @@ export function LogScreen() {
       ) : null}
 
       <Section title="Estimate">
-        <View style={styles.actions}>
+        <View className="gap-2">
           <ActionCard
-            icon="◉"
+            icon="camera-outline"
             title="Take or choose a photo"
             body="Review an estimate before saving"
             onPress={() => router.push('/capture-photo')}
           />
           <ActionCard
-            icon="✦"
+            icon="chatbubble-ellipses-outline"
             title="Describe your food"
             body="Include the portion for a better estimate"
             onPress={() => router.push('/text-estimate')}
@@ -109,7 +107,7 @@ export function LogScreen() {
 
       <Section title="Exact values">
         <ActionCard
-          icon="＋"
+          icon="create-outline"
           title="Manual entry"
           body="Enter calories and macros yourself"
           onPress={() => router.push('/manual-entry')}
@@ -118,7 +116,7 @@ export function LogScreen() {
 
       <Section title="Favorite presets" {...(favorites.length ? { detail: 'One-tap log' } : {})}>
         {favorites.length ? (
-          <View style={styles.actions}>
+          <View className="gap-2">
             {favorites.map((preset) => (
               <FavoritePreset key={preset.id} preset={preset} onQuickAdd={(item) => void quickAdd(item)} />
             ))}
@@ -134,26 +132,3 @@ export function LogScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  actions: { gap: spacing.sm },
-  preset: {
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  presetMain: { padding: spacing.lg, gap: spacing.md },
-  pressed: { opacity: 0.7 },
-  presetHeader: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md },
-  presetTitle: { flex: 1, gap: 2 },
-  presetName: { fontSize: 17, lineHeight: 21, fontWeight: '800' },
-  caption: { fontSize: 12, lineHeight: 16 },
-  add: { fontSize: 14, fontWeight: '800' },
-  edit: {
-    minHeight: 44,
-    paddingHorizontal: spacing.lg,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  editText: { fontSize: 13, fontWeight: '700' },
-});

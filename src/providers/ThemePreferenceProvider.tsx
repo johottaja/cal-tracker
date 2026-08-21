@@ -7,6 +7,7 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
+import { colorScheme } from 'nativewind';
 import { Appearance } from 'react-native';
 import * as SecureStore from '@/platform/secureStore';
 
@@ -30,7 +31,9 @@ function parsePreference(value: string | null): ThemePreference {
 }
 
 function applyPreference(preference: ThemePreference) {
-  Appearance.setColorScheme(preference === 'system' ? null : preference);
+  const next = preference === 'system' ? null : preference;
+  Appearance.setColorScheme(next);
+  colorScheme.set(preference === 'system' ? 'system' : preference);
 }
 
 export function ThemePreferenceProvider({ children }: PropsWithChildren) {

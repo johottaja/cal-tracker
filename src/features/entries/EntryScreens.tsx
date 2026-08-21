@@ -1,9 +1,8 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLayoutEffect, useMemo, useState } from 'react';
+import { Alert, Text, View } from 'react-native';
 
 import { AppButton, Card, EmptyState, Heading, Screen, Section } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
 import { asLocalDate, timestampForLocalDate, todayLocalDate } from '@/domain/dates';
 import type { CreatePresetInput, FoodEntry } from '@/domain/models';
 import {
@@ -13,6 +12,7 @@ import {
   type EntryFormValue,
 } from '@/features/entries/EntryFormFields';
 import { InlineNotice, MacroSummary, sourceLabels, StatusPill } from '@/features/shared/FeatureUI';
+import { closeModal, finishTo } from '@/navigation/modals';
 import { useApp } from '@/providers/AppProvider';
 
 function formFromEntry(entry: FoodEntry): EntryFormValue {
@@ -63,7 +63,7 @@ export function ManualEntryScreen() {
       } else {
         await createEntry({ ...input, source: 'manual' });
       }
-      router.replace('/');
+      finishTo('/');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not save this entry.');
     } finally {
@@ -78,7 +78,7 @@ export function ManualEntryScreen() {
         <EmptyState
           title="This entry could not be found"
           body="It may have been removed on another device."
-          action={<AppButton label="Go home" onPress={() => router.replace('/')} />}
+          action={<AppButton label="Go home" onPress={() => finishTo('/')} />}
         />
       </Screen>
     );
@@ -91,7 +91,7 @@ export function ManualEntryScreen() {
         subtitle="Use the values from the package, recipe, or your own calculation."
       />
       {error ? <InlineNotice kind="error">{error}</InlineNotice> : null}
-      <Card style={styles.form}>
+      <Card className="gap-4">
         <EntryFormFields value={value} onChange={setValue} />
       </Card>
       <AppButton
@@ -99,12 +99,13 @@ export function ManualEntryScreen() {
         onPress={() => void save()}
         loading={saving}
       />
-      <AppButton label="Cancel" variant="ghost" onPress={() => router.back()} disabled={saving} />
+      <AppButton label="Cancel" variant="ghost" onPress={closeModal} disabled={saving} />
     </Screen>
   );
 }
 
 export function ReviewEntryScreen() {
+  const navigation = useNavigation();
   const { reviewDraft, setReviewDraft, createEntry } = useApp();
   const initial = useMemo<EntryFormValue | null>(
     () =>
@@ -126,6 +127,12 @@ export function ReviewEntryScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  useLayoutEffect(() => {
+    const parent = navigation.getParent();
+    parent?.setOptions({ gestureEnabled: false });
+    return () => parent?.setOptions({ gestureEnabled: true });
+  }, [navigation]);
+
   if (!reviewDraft || !value) {
     return (
       <Screen>
@@ -133,7 +140,7 @@ export function ReviewEntryScreen() {
         <EmptyState
           title="There is no estimate to review"
           body="For privacy, photo and estimate data are discarded when the review flow ends."
-          action={<AppButton label="Start again" onPress={() => router.replace('/log')} />}
+          action={<AppButton label="Start again" onPress={() => finishTo('/log')} />}
         />
       </Screen>
     );
@@ -168,7 +175,7 @@ export function ReviewEntryScreen() {
       if (savePreset) {
         router.replace({ pathname: '/preset-editor', params: presetParams });
       } else {
-        router.replace('/');
+        finishTo('/');
       }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not save this entry.');
@@ -185,7 +192,7 @@ export function ReviewEntryScreen() {
         style: 'destructive',
         onPress: () => {
           setReviewDraft(null);
-          router.back();
+          finishTo('/');
         },
       },
     ]);
@@ -201,7 +208,7 @@ export function ReviewEntryScreen() {
         {reviewDraft.assumptions ?? 'Review the assumed serving size carefully.'}
       </InlineNotice>
       {error ? <InlineNotice kind="error">{error}</InlineNotice> : null}
-      <Card style={styles.form}>
+      <Card className="gap-4">
         <EntryFormFields value={value} onChange={setValue} />
       </Card>
       <AppButton
@@ -210,7 +217,7 @@ export function ReviewEntryScreen() {
         loading={saving}
       />
       <AppButton
-        label={savePreset ? '✓ Save as preset too' : 'Save as preset too'}
+        label={savePreset ? 'Save as preset too' : 'Save as preset too'}
         variant="secondary"
         onPress={() => setSavePreset((current) => !current)}
         disabled={saving}
@@ -221,7 +228,6 @@ export function ReviewEntryScreen() {
 }
 
 export function EntryDetailScreen() {
-  const theme = useAppTheme();
   const params = useLocalSearchParams<{ id?: string }>();
   const { entries, deleteEntry } = useApp();
   const entry = entries.find((item) => item.id === params.id);
@@ -246,7 +252,7 @@ export function EntryDetailScreen() {
           setDeleting(true);
           try {
             await deleteEntry(entry.id);
-            router.replace('/');
+            finishTo('/');
           } finally {
             setDeleting(false);
           }
@@ -265,7 +271,7 @@ export function EntryDetailScreen() {
   return (
     <Screen>
       <Heading title={entry.name} subtitle={entry.localDate} />
-      <View style={styles.pills}>
+      <View className="flex-row flex-wrap gap-2">
         <StatusPill label={sourceLabels[entry.source]} />
         <StatusPill
           label={new Intl.DateTimeFormat(undefined, {
@@ -274,13 +280,13 @@ export function EntryDetailScreen() {
           }).format(new Date(entry.loggedAt))}
         />
       </View>
-      <Card style={styles.detailCard}>
+      <Card className="gap-4">
         <MacroSummary values={entry} />
       </Card>
       {entry.notes ? (
         <Section title="Notes">
           <Card>
-            <Text style={[styles.notes, { color: theme.text }]}>{entry.notes}</Text>
+            <Text className="text-base leading-6 text-foreground">{entry.notes}</Text>
           </Card>
         </Section>
       ) : null}
@@ -316,10 +322,3 @@ export function presetInputFromParams(params: Record<string, string | string[] |
     fatG: Number(read('fatG') ?? 0),
   };
 }
-
-const styles = StyleSheet.create({
-  form: { gap: spacing.lg },
-  pills: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap' },
-  detailCard: { gap: spacing.lg },
-  notes: { fontSize: 16, lineHeight: 24 },
-});

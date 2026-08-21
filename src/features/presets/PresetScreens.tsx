@@ -1,14 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Pressable, Switch, Text, View } from 'react-native';
 
+import { AppIcon } from '@/components/AppIcon';
 import {
   AppButton,
   Card,
@@ -20,10 +14,11 @@ import {
   Section,
   SegmentedControl,
 } from '@/components/ui';
-import { spacing, useAppTheme } from '@/constants/theme';
+import { useAppTheme } from '@/constants/theme';
 import type { Preset, PresetKind } from '@/domain/models';
 import { presetInputFromParams } from '@/features/entries/EntryScreens';
 import { InlineNotice, MacroSummary, StatusPill } from '@/features/shared/FeatureUI';
+import { closeModal, finishTo } from '@/navigation/modals';
 import { useApp } from '@/providers/AppProvider';
 
 const filters = ['All', 'Meals', 'Items', 'Portions'] as const;
@@ -46,20 +41,21 @@ function PresetRow({
   onQuickAdd: () => void;
   onFavorite: () => void;
 }) {
-  const theme = useAppTheme();
   return (
-    <Card style={styles.presetCard}>
-      <View style={styles.presetHeader}>
+    <Card className="gap-4">
+      <View className="flex-row gap-3">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Open ${preset.name}`}
           onPress={() => router.push({ pathname: '/preset-editor', params: { id: preset.id } })}
-          style={styles.presetCopy}>
-          <Text style={[styles.presetName, { color: theme.text }]}>{preset.name}</Text>
-          <View style={styles.metaRow}>
+          className="flex-1 gap-2 active:opacity-70">
+          <Text className="text-[19px] font-extrabold leading-6 text-foreground">{preset.name}</Text>
+          <View className="flex-row items-center gap-2">
             <StatusPill label={preset.kind} />
             {preset.servingLabel ? (
-              <Text style={[styles.caption, { color: theme.muted }]}>{preset.servingLabel}</Text>
+              <Text className="text-[13px] leading-[18px] text-muted-foreground">
+                {preset.servingLabel}
+              </Text>
             ) : null}
           </View>
         </Pressable>
@@ -68,20 +64,23 @@ function PresetRow({
           accessibilityLabel={
             preset.isFavorite ? `Remove ${preset.name} from favorites` : `Favorite ${preset.name}`
           }
+          accessibilityState={{ selected: preset.isFavorite }}
           onPress={onFavorite}
           hitSlop={12}
-          style={styles.starButton}>
-          <Text style={[styles.star, { color: preset.isFavorite ? theme.warning : theme.muted }]}>
-            {preset.isFavorite ? '★' : '☆'}
-          </Text>
+          className="h-11 w-11 items-center justify-center active:opacity-70">
+          <AppIcon
+            name={preset.isFavorite ? 'star' : 'star-outline'}
+            size={24}
+            className={preset.isFavorite ? 'text-warning' : 'text-muted-foreground'}
+          />
         </Pressable>
       </View>
       <MacroSummary values={preset} />
-      <View style={styles.row}>
-        <View style={styles.flex}>
+      <View className="flex-row gap-2">
+        <View className="flex-1">
           <AppButton label="Quick add" onPress={onQuickAdd} />
         </View>
-        <View style={styles.flex}>
+        <View className="flex-1">
           <AppButton
             label="Edit"
             variant="secondary"
@@ -151,7 +150,7 @@ export function PresetsScreen() {
       <SegmentedControl values={filters} value={filter} onChange={setFilter} />
       <Section title={filter === 'All' ? 'All presets' : filter} detail={`${visible.length}`}>
         {visible.length ? (
-          <View style={styles.list}>
+          <View className="gap-3">
             {visible.map((preset) => (
               <PresetRow
                 key={preset.id}
@@ -259,7 +258,7 @@ export function PresetEditorScreen() {
     try {
       if (existing) await updatePreset(existing.id, input);
       else await createPreset(input);
-      router.replace('/presets');
+      finishTo('/presets');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Could not save this preset.');
     } finally {
@@ -276,7 +275,7 @@ export function PresetEditorScreen() {
         style: 'destructive',
         onPress: async () => {
           await deletePreset(existing.id);
-          router.replace('/presets');
+          finishTo('/presets');
         },
       },
     ]);
@@ -289,15 +288,15 @@ export function PresetEditorScreen() {
         subtitle="Preset values are copied into each new log entry."
       />
       {error ? <InlineNotice kind="error">{error}</InlineNotice> : null}
-      <Card style={styles.form}>
+      <Card className="gap-4">
         <Field
           label="Name"
           placeholder="e.g. Breakfast oats"
           value={form.name}
           onChangeText={(name) => setForm({ ...form, name })}
         />
-        <View style={styles.fieldGap}>
-          <Text style={[styles.label, { color: theme.text }]}>Kind</Text>
+        <View className="gap-2">
+          <Text className="text-sm font-bold leading-[18px] text-foreground">Kind</Text>
           <SegmentedControl
             values={kinds}
             value={form.kind}
@@ -310,8 +309,8 @@ export function PresetEditorScreen() {
           value={form.servingLabel}
           onChangeText={(servingLabel) => setForm({ ...form, servingLabel })}
         />
-        <View style={styles.numericGrid}>
-          <View style={styles.flex}>
+        <View className="flex-row gap-3">
+          <View className="flex-1 gap-3">
             <NumericField
               label="Calories"
               value={form.calories}
@@ -324,7 +323,7 @@ export function PresetEditorScreen() {
               onChangeText={(carbsG) => setForm({ ...form, carbsG })}
             />
           </View>
-          <View style={styles.flex}>
+          <View className="flex-1 gap-3">
             <NumericField
               label="Protein (g)"
               value={form.proteinG}
@@ -337,10 +336,10 @@ export function PresetEditorScreen() {
             />
           </View>
         </View>
-        <View style={styles.switchRow}>
-          <View style={styles.switchCopy}>
-            <Text style={[styles.label, { color: theme.text }]}>Favorite</Text>
-            <Text style={[styles.caption, { color: theme.muted }]}>
+        <View className="flex-row items-center gap-3">
+          <View className="flex-1 gap-0.5">
+            <Text className="text-sm font-bold leading-[18px] text-foreground">Favorite</Text>
+            <Text className="text-[13px] leading-[18px] text-muted-foreground">
               Show this preset in the Log tab.
             </Text>
           </View>
@@ -360,27 +359,7 @@ export function PresetEditorScreen() {
       {existing ? (
         <AppButton label="Delete preset" variant="danger" onPress={confirmDelete} />
       ) : null}
-      <AppButton label="Cancel" variant="ghost" onPress={() => router.back()} />
+      <AppButton label="Cancel" variant="ghost" onPress={closeModal} />
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  list: { gap: spacing.md },
-  presetCard: { gap: spacing.lg },
-  presetHeader: { flexDirection: 'row', gap: spacing.md },
-  presetCopy: { flex: 1, gap: spacing.sm },
-  presetName: { fontSize: 19, lineHeight: 24, fontWeight: '800' },
-  caption: { fontSize: 13, lineHeight: 18 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  starButton: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
-  star: { fontSize: 26 },
-  row: { flexDirection: 'row', gap: spacing.sm },
-  flex: { flex: 1, gap: spacing.md },
-  form: { gap: spacing.lg },
-  fieldGap: { gap: spacing.sm },
-  label: { fontSize: 14, lineHeight: 18, fontWeight: '700' },
-  numericGrid: { flexDirection: 'row', gap: spacing.md },
-  switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  switchCopy: { flex: 1, gap: 2 },
-});

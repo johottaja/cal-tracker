@@ -2,85 +2,52 @@ import { useColorScheme, type ColorValue } from 'react-native';
 
 type GradientStops = readonly [ColorValue, ColorValue, ...ColorValue[]];
 
-const palette = {
-  ink: '#182022',
-  cream: '#F7F3EA',
-  paper: '#FFFDF8',
-  moss: '#2F6B4F',
-  mossSoft: '#DDEBE2',
-  apricot: '#E98A59',
-  sky: '#4D83A6',
-  gold: '#C49A32',
-  plum: '#8A5E86',
-  red: '#B84C4C',
-  white: '#FFFFFF',
-  black: '#0E1213',
-};
-
 export const macroColors = {
-  calories: palette.apricot,
-  proteinG: palette.sky,
-  carbsG: palette.gold,
-  fatG: palette.plum,
+  calories: '#d9773a',
+  proteinG: '#3d7396',
+  carbsG: '#a57b18',
+  fatG: '#7a5278',
 } as const;
 
 export const macroGradients = {
-  calories: ['#F5A87A', '#E98A59'] as GradientStops,
-  proteinG: ['#6BA0C8', '#4D83A6'] as GradientStops,
-  carbsG: ['#D9B04A', '#C49A32'] as GradientStops,
-  fatG: ['#A88AA4', '#8A5E86'] as GradientStops,
+  calories: ['#f0a06c', '#d9773a'] as GradientStops,
+  proteinG: ['#7eb0d0', '#3d7396'] as GradientStops,
+  carbsG: ['#e2bd5c', '#a57b18'] as GradientStops,
+  fatG: ['#c4a0c0', '#7a5278'] as GradientStops,
 } as const;
 
 export const lightTheme = {
-  background: palette.cream,
-  surface: palette.paper,
-  elevated: palette.white,
-  text: palette.ink,
-  muted: '#687173',
-  border: '#DED9CE',
-  primary: palette.moss,
-  primarySoft: palette.mossSoft,
-  onPrimarySoft: palette.ink,
-  success: palette.moss,
-  warning: palette.gold,
-  error: palette.red,
-  tabBar: '#FFFCF5',
-  shadow: '#17201D',
-  gradients: {
-    screen: ['#F7F3EA', '#FFF5E8', '#F0E8D8'] as GradientStops,
-    primary: ['#3D7A5E', '#2F6B4F'] as GradientStops,
-    icon: ['#E4F0E8', '#DDEBE2'] as GradientStops,
-    card: ['#FFFDF8', '#FFF8EE'] as GradientStops,
-    hero: ['#3D7A5E', '#2F6B4F', '#285943'] as GradientStops,
-    tabBar: ['#FFFCF5', '#F3EDE2'] as GradientStops,
-    segment: ['#FFFFFF', '#F7F1E6'] as GradientStops,
-  },
+  background: '#f3eee4',
+  surface: '#fffdf8',
+  elevated: '#ffffff',
+  text: '#182022',
+  muted: '#4a5557',
+  border: '#d5d0c4',
+  primary: '#2f6b4f',
+  primarySoft: '#d7e8dd',
+  onPrimarySoft: '#182022',
+  success: '#2f6b4f',
+  warning: '#a57b18',
+  error: '#b42318',
+  tabBar: '#fffaf2',
+  shadow: '#17201d',
 };
 
 export const darkTheme = {
-  background: '#101514',
-  surface: '#18201E',
-  elevated: '#202A27',
-  text: '#F7F3EA',
-  muted: '#A7B0AC',
-  border: '#34403C',
-  primary: '#79B996',
-  primarySoft: '#233B30',
-  onPrimarySoft: palette.white,
-  success: '#79B996',
-  warning: '#E2BD5C',
-  error: '#EF8B86',
-  tabBar: '#141B19',
+  background: '#0f1413',
+  surface: '#18201e',
+  elevated: '#222c29',
+  text: '#f4f0e6',
+  muted: '#c5ceca',
+  border: '#3a4743',
+  primary: '#7fbe9b',
+  primarySoft: '#1d3329',
+  onPrimarySoft: '#f4f0e6',
+  success: '#7fbe9b',
+  warning: '#e2bd5c',
+  error: '#f2a4a0',
+  tabBar: '#141b19',
   shadow: '#000000',
-  gradients: {
-    screen: ['#101514', '#16201C', '#0C100F'] as GradientStops,
-    primary: ['#8FCEAB', '#4F8F6E'] as GradientStops,
-    icon: ['#2E4A3C', '#233B30'] as GradientStops,
-    card: ['#1C2623', '#151D1B'] as GradientStops,
-    hero: ['#3A6B55', '#254636', '#1A3228'] as GradientStops,
-    tabBar: ['#18201E', '#121917'] as GradientStops,
-    segment: ['#2A3833', '#1F2B27'] as GradientStops,
-  },
 };
 
 export const spacing = {
@@ -91,13 +58,6 @@ export const spacing = {
   xl: 24,
   xxl: 32,
   huge: 48,
-} as const;
-
-export const radii = {
-  sm: 10,
-  md: 16,
-  lg: 24,
-  pill: 999,
 } as const;
 
 export type AppTheme = typeof lightTheme;
