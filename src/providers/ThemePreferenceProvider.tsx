@@ -31,7 +31,7 @@ function parsePreference(value: string | null): ThemePreference {
 }
 
 function applyPreference(preference: ThemePreference) {
-  const next = preference === 'system' ? null : preference;
+  const next = preference === 'system' ? 'unspecified' : preference;
   Appearance.setColorScheme(next);
   colorScheme.set(preference === 'system' ? 'system' : preference);
 }
