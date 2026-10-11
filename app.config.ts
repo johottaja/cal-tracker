@@ -10,16 +10,11 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   scheme: 'caltracker',
   userInterfaceStyle: 'automatic',
-  icon: './assets/icon.png',
-  splash: {
-    image: './assets/splash-screen.png',
-    resizeMode: 'contain',
-    backgroundColor: splashBackgroundColor,
-  },
+  icon: './assets/icon-v2.png',
   web: {
     bundler: 'metro',
     output: 'static',
-    favicon: './assets/icon.png',
+    favicon: './assets/icon-v2.png',
     name: 'Cal Tracker',
     shortName: 'Cal Tracker',
     themeColor: splashBackgroundColor,
