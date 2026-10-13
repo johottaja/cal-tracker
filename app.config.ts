@@ -1,11 +1,20 @@
 import type { ExpoConfig } from 'expo/config';
 
 const splashBackgroundColor = '#1B4332';
+const easProjectId = 'c6752fca-d273-48d8-b208-a875741f43a5';
 
 const config: ExpoConfig = {
   name: 'Cal Tracker',
   slug: 'cal-tracker',
+  owner: 'johocharger',
   version: '1.0.0',
+  runtimeVersion: { policy: 'appVersion' },
+  updates: {
+    url: `https://u.expo.dev/${easProjectId}`,
+    checkAutomatically: 'ON_LOAD',
+    fallbackToCacheTimeout: 0,
+  },
+  extra: { eas: { projectId: easProjectId } },
   platforms: ['ios', 'web'],
   orientation: 'portrait',
   scheme: 'caltracker',
@@ -22,8 +31,8 @@ const config: ExpoConfig = {
   },
   ios: {
     supportsTablet: false,
-    bundleIdentifier:
-      process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER ?? 'com.joonas.caltracker',
+    bundleIdentifier: 'com.joonaslindroos.caltracker',
+    config: { usesNonExemptEncryption: false },
     infoPlist: {
       NSCameraUsageDescription:
         'Cal Tracker uses the camera to estimate nutrition from meal photos.',
